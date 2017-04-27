@@ -36,6 +36,14 @@ describe('Array', function () {
         expect(Array.isArray(Array.from(arguments))).to.be.true;
         done();
     });
+
+    it('Array.of', function (done) {
+
+        expect(Array.of([1], 2, 3).length).to.be.equal(3);
+        expect(Array.of([1], 2, 3)[0].length).to.be.equal(1);
+        expect(Array.of([1], 2, 3)[1]).to.be.equal(2);
+        done();
+    });    
 });
 
 

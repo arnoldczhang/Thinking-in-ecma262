@@ -7,14 +7,13 @@
 		, STR = ''
 
 		, $toString = OBJ.toString
-		, $each = ARR.forEach
 
 		, MAX_ARRAY_LEN = Math.pow(2, 53) -1
 		;
 
 	var _ = {};
 
-	$each.call('Object String Symbol Null Undefined Array'.split(/\s/), function (el) {
+	$each('Object String Symbol Null Undefined Array'.split(/\s/), function (el) {
 		_['is' + el] = function (obj) {
 			return $toString.call(obj) === '[object ' + el + ']';
 		};
@@ -84,6 +83,18 @@
 		}
 	};
 
+	function $each (arr, cb, thisArg) {
+		var 
+			i = 0
+			, len
+			;
+		if (len = arr.length) {
+			for ( ; i < len; ++i) {
+				cb.call(thisArg, arr[i], i, arr);
+			}
+		}
+	};
+
 	/**
 	 * Array.from
 	 */
@@ -104,7 +115,7 @@
 			}
 
 			arr = Array(0);
-			$each.call(items, hasMapFn ? function (item, index, _a) {
+			$each(items, hasMapFn ? function (item, index, _a) {
 				arr[index] = mapFn.call(T, item, index, _a);
 			} : function (item, index) {
 				arr[index] = item;
@@ -114,15 +125,50 @@
 		else {
 			length = toObject(items).length;
 			arr = Array(length);
-			index = 0;
+			index = -1;
 
-			while (index++ < length) {
+			while (++index < length) {
 				arr[index] = hasMapFn 
 					? mapFn.call(T, items[index], index, items)			
-					: items[index];				
+					: items[index];
 			}
 		}
 
 		return arr;
 	};
+
+	/**
+	 * Array.of
+	 */
+	Array.of = function arrayOf () {
+		var
+			args = arguments
+			, length = args.length
+			, _this = this
+			, index = -1
+			, arr
+			;
+
+		arr = Array(length);
+
+		while (++index < length) {
+			arr[index] = args[index];
+		}
+
+		return arr;
+	};
+
+	/**
+	 * Array.prototype.concat
+	 */
+	// Array.prototype.concat = function arrayProConcat () {
+	// 	var 
+	// 		args = arguments
+	// 		, _this = this
+	// 		, length = args.length
+	// 		, arr
+	// 		;
+		
+
+	// };
 } ());

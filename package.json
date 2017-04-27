@@ -1,0 +1,46 @@
+{
+  "name": "ecma",
+  "version": "1.0.0",
+  "description": "ecma",
+  "main": "test.js",
+  "dependencies": {
+    "benchmark": "^2.1.3",
+    "chai": "^1.9.1",
+    "colors": "^1.1.2",
+    "fs": "0.0.2",
+    "http": "0.0.0",
+    "karma": "^0.13.19",
+    "karma-browserstack-launcher": "^1.0.1",
+    "karma-chrome-launcher": "^0.2.3",
+    "karma-coverage": "^0.5.3",
+    "karma-firefox-launcher": "^0.1.7",
+    "karma-junit-reporter": "^0.3.8",
+    "karma-mocha": "^1.3.0",
+    "karma-mocha-reporter": "^2.2.2",
+    "less-loader": "^2.2.2",
+    "lodash": "^4.17.4",
+    "mocha": "^2.5.3",
+    "mochawesome": "^1.3.4",
+    "platform": "^1.3.3",
+    "q": "^1.4.1",
+    "request": "^2.79.0"
+  },
+  "devDependencies": {
+    "karma-browserstack-launcher": "^1.0.1",
+    "karma-chrome-launcher": "^0.2.3",
+    "karma-coverage": "^0.5.3",
+    "karma-firefox-launcher": "^0.1.7",
+    "karma-junit-reporter": "^0.3.8",
+    "karma-mocha": "^1.3.0",
+    "karma-mocha-reporter": "^2.2.2",
+    "mochawesome": "^1.5.5"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ecma"
+  ],
+  "author": "Arnold",
+  "license": "ISC"
+}

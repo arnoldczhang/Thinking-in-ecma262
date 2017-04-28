@@ -13,11 +13,31 @@
 
 	var _ = {};
 
-	$each('Object String Symbol Null Undefined Array'.split(/\s/), function (el) {
+	$each('Object String Symbol Null Undefined Array Function '.split(/\s/), function (el) {
 		_['is' + el] = function (obj) {
 			return $toString.call(obj) === '[object ' + el + ']';
 		};
 	});
+
+	var logger = function () {
+		var keySet = {};
+		return {
+			count: function count (key) {
+
+				var count = keySet[key];
+
+				if (_.isUndefined(count)) {
+					keySet[key] = count = 1;
+				}
+
+				else {
+					keySet[key] = count += 1;
+				}
+
+				console.log((key + ' call for ' + count + ' times').magenta);
+			}
+		};
+	}();
 
 	function isCallable (func) {
 		return func.call;
@@ -58,16 +78,6 @@
 		return Object(o);
 	};
 
-	function get (p, v) {
-
-		if (_.isObject(p)) {
-
-			if (isPropertyKey(v)) {
-				return ;
-			}
-		}
-	};
-
 	function getV (v, p) {
 
 		if (isPropertyKey(p)) {
@@ -88,17 +98,29 @@
 			i = 0
 			, len
 			;
-		if (len = arr.length) {
-			for ( ; i < len; ++i) {
-				cb.call(thisArg, arr[i], i, arr);
-			}
+
+		if (isCallable(cb)) {
+			if (len = arr.length) {
+				for ( ; i < len; ++i) {
+					cb.call(thisArg, arr[i], i, arr);
+				}
+			}			
 		}
+	};
+
+	function $def (obj, prop, value) {
+		Object.defineProperty(obj, prop, {
+			enumerable: false,
+			configurable: false,
+			value: value
+		});
 	};
 
 	/**
 	 * Array.from
 	 */
-	Array.from = function arrayFrom (items, mapFn, thisArg) {
+	$def(Array, '$from', function arrayFrom (items, mapFn, thisArg) {
+		logger.count('`Array.from`');
 		var 
 			_this = this
 			, hasMapFn = mapFn && isCallable(mapFn)
@@ -135,12 +157,13 @@
 		}
 
 		return arr;
-	};
+	});
 
 	/**
 	 * Array.of
 	 */
-	Array.of = function arrayOf () {
+	$def(Array, '$of', function arrayOf () {
+		logger.count('`Array.of`');
 		var
 			args = arguments
 			, length = args.length
@@ -156,19 +179,60 @@
 		}
 
 		return arr;
-	};
+	});
 
 	/**
 	 * Array.prototype.concat
 	 */
-	// Array.prototype.concat = function arrayProConcat () {
-	// 	var 
-	// 		args = arguments
-	// 		, _this = this
-	// 		, length = args.length
-	// 		, arr
-	// 		;
+	$def(Array.prototype, '$concat', function arrayProConcat () {
+		logger.count('`Array.prototype.concat`');
+		var 
+			args = arguments
+			, _this = this
+			, length = args.length
+			, list = Array(length + 1)
+			, arr = []
+			, n = 0
+			, index = 0
+			;
 		
+		list[0] = _this;
+		$each(args, function (arg, i) {
+			list[i + 1] = arg;
+		});
 
-	// };
+		$each(list, function (item) {
+
+			if (_.isArray(item)) {
+
+				if (n + item.length > MAX_ARRAY_LEN) {
+					throw new TypeError('');
+				}
+
+				$each(item, function (it) {
+					arr[arr.length] = it;
+					n++;
+				});
+			}
+
+			else {
+
+				if (n + 1 > MAX_ARRAY_LEN) {
+					throw new TypeError('');
+				}
+
+				arr[arr.length] = item;
+				n++;
+			}
+		});
+		return arr;
+	});
 } ());
+
+
+
+
+
+
+
+

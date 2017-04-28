@@ -310,6 +310,35 @@
 
 		return _this;
 	});
+
+	/**
+	 * Array.prototype.every
+	 */
+	$def(Array.prototype, '$every', function every (cb, thisArg) {
+		logger.count('`Array.prototype.every`');
+		thisArg = thisArg || void 0;
+		var 
+			args = arguments
+			, _this = Object(this)
+			, length = _this.length
+			, list = []
+			, index = length
+			, returnValue = true
+			;
+
+		if (!isCallable(cb)) {
+			throw new TypeError('');
+		}
+
+		while (--index >= 0) {
+			
+			if (!cb.call(thisArg, _this[index], index, _this)) {
+				returnValue = false;
+				break;
+			}
+		}
+		return returnValue;
+	});
 } ());
 
 

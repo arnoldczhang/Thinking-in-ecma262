@@ -119,7 +119,7 @@
 	/**
 	 * Array.from
 	 */
-	$def(Array, '$from', function arrayFrom (items, mapFn, thisArg) {
+	$def(Array, '$from', function from (items, mapFn, thisArg) {
 		logger.count('`Array.from`');
 		var 
 			_this = this
@@ -162,7 +162,7 @@
 	/**
 	 * Array.of
 	 */
-	$def(Array, '$of', function arrayOf () {
+	$def(Array, '$of', function of () {
 		logger.count('`Array.of`');
 		var
 			args = arguments
@@ -184,7 +184,7 @@
 	/**
 	 * Array.prototype.concat
 	 */
-	$def(Array.prototype, '$concat', function arrayProConcat () {
+	$def(Array.prototype, '$concat', function concat () {
 		logger.count('`Array.prototype.concat`');
 		var 
 			args = arguments
@@ -226,6 +226,89 @@
 			}
 		});
 		return arr;
+	});
+
+	/**
+	 * Array.prototype.copyWithin
+	 */
+	$def(Array.prototype, '$copyWithin', function copyWithin (target, start, end) {
+		logger.count('`Array.prototype.copyWithin`');
+		var 
+			args = arguments
+			, _this = Object(this)
+			, length = _this.length
+			, list = []
+			, index = 0
+			, to
+			, from
+			, count
+			, final
+			, direction
+			, relativeTarget = target >> 0
+			, relativeStart = start >> 0
+			, relativeEnd
+			;
+
+		if (relativeTarget < 0) {
+			to = Math.max(length + relativeTarget, 0);
+		}
+
+		else {
+			to = Math.min(relativeTarget, length);
+		}
+
+		if (relativeStart < 0) {
+			from = Math.max(length + relativeStart, 0);
+		}
+
+		else {
+			from = Math.min(relativeStart, length);
+		}
+
+		if (_.isUndefined(end)) {
+			relativeEnd = length;
+		}
+
+		else {
+			relativeEnd = end >> 0;
+		}
+
+		if (relativeEnd < 0) {
+			final = Math.max(length + relativeEnd, 0);
+		}
+
+		else {
+			final = Math.min(relativeEnd, length);
+		}
+
+		count = Math.min(final - from, length - to);
+
+		if (from < to && to < (from + count)) {
+			direction = -1;
+			from += count - 1;
+			to += count - 1;
+		}
+
+		else {
+			direction = 1;
+		}
+
+		while (count > 0) {
+
+			if (from in _this) {
+				_this[to] = _this[from];
+			}
+
+			else {
+				delete O[to];
+			}
+
+			from += direction;
+			to += direction;
+			count--;
+		}
+
+		return _this;
 	});
 } ());
 

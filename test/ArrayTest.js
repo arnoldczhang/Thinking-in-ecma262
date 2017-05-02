@@ -194,6 +194,49 @@ describe('Array', function () {
         done();
     });
 
+    it('Array.prototype.includes', function (done) {
+        expect([1, 2, 3].$includes(2)).to.be.true;
+        expect([1, 2, 3].$includes(4)).to.be.false;
+        expect([1, 2, 3].$includes(3, 3)).to.be.false;
+        expect([1, 2, 3].$includes(3, -1)).to.be.true;
+        expect([1, 2, NaN].$includes(NaN)).to.be.true;
+
+        var arr = ['a', 'b', 'c'];
+        expect(arr.$includes('c', 3)).to.be.false;
+        expect(arr.$includes('c', 100)).to.be.false;
+        expect(arr.$includes('a', -100)).to.be.true;
+        expect(arr.$includes('b', -100)).to.be.true;
+
+        (function() {
+          expect([].$includes.call(arguments, 'a')).to.be.true;
+          expect([].$includes.call(arguments, 'd')).to.be.false;
+        })('a','b','c');
+        done();
+    });
+
+    it('Array.prototype.indexOf', function (done) {
+        var a = [2, 9, 9]; 
+        expect(a.$indexOf(2)).to.be.equal(0);
+        expect(a.$indexOf(7)).to.be.equal(-1);
+        var array = [2, 5, 9];
+        expect(array.$indexOf(2)).to.be.equal(0);     
+        expect(array.$indexOf(7)).to.be.equal(-1);    
+        expect(array.$indexOf(9, 2)).to.be.equal(2);  
+        expect(array.$indexOf(2, -1)).to.be.equal(-1);
+        expect(array.$indexOf(2, -3)).to.be.equal(0);
+
+        var indices = [];
+        var array = ['a', 'b', 'a', 'c', 'a', 'd'];
+        var element = 'a';
+        var idx = array.$indexOf(element);
+        while (idx != -1) {
+          indices.push(idx);
+          idx = array.$indexOf(element, idx + 1);
+        }
+        expect(indices).to.deep.equal([0, 2, 4]);
+        done();
+    });
+
 });
 
 

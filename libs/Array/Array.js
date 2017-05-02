@@ -13,7 +13,7 @@
 
 	var _ = {};
 
-	$each('Object String Symbol Null Undefined Array Function Boolean'.split(/\s/), function (el) {
+	$each('Object String Symbol Null Undefined Array Function Boolean Number'.split(/\s/), function (el) {
 		_['is' + el] = function (obj) {
 			return $toString.call(obj) === '[object ' + el + ']';
 		};
@@ -118,6 +118,55 @@
 		}
 
 		return Math.floor(num);
+	};
+
+	function type (value) {
+		return typeof value;
+	};
+
+	function isSameValueZero (x, y) {
+
+		if (type(x) != type(y)) {
+			return false;
+		}
+
+		if (_.isNumber(x)) {
+
+			if (isNaN(x) && isNaN(y)) {
+				return true;
+			}
+
+			if (x === +0 && y === -0
+				|| x === -0 && y === +0) {
+				return true;
+			}
+
+			if (_.isNumber(y) && x === y) {
+				return true;
+			}
+
+			return false;
+		}
+
+		if (_.isUndefined(x) || _.isNull(x)) {
+			return true;
+		}
+
+		if (_.isString(x)) {
+
+			//TODO the same sequence of code units
+			return x === y;
+		}
+
+		if (_.isBoolean(x)) {
+			return x === true && y === true
+				|| x === false && y === false;
+		}
+
+		if (_.isObject(x) && _.isObject(y)) {
+			return x === y;
+		}
+
 	};
 
 	function getV (v, p) {
@@ -560,6 +609,106 @@
 
 		return returnValue;
 	});
+
+	/**
+	 * Array.prototype.includes
+	 */
+	$def(Array.prototype, '$includes', function includes (searchElement, fromIndex) {
+		logger.count('`Array.prototype.includes`');
+		fromIndex = toInteger(fromIndex);
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, index
+			, pKey
+			, pValue
+			;
+
+		if (!length) {
+			return false;
+		}
+
+		if (fromIndex < 0) {
+			fromIndex += length;
+
+			if (fromIndex < 0) {
+				fromIndex = 0;
+			}
+		}
+
+		index = fromIndex;
+
+		while (index < length) {
+			pKey = String(index);
+			pValue = _this[pKey];
+
+			if (isSameValueZero(pValue, searchElement)) {
+				return true;
+			}
+
+			index++;
+		}
+
+		return false;
+	});
+
+	/**
+	 * Array.prototype.indexOf
+	 */
+	$def(Array.prototype, '$indexOf', function indexOf (searchElement, fromIndex) {
+		logger.count('`Array.prototype.indexOf`');
+		fromIndex = toInteger(fromIndex);
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, index
+			, pKey
+			, pValue
+			;
+
+		if (!length) {
+			return -1;
+		}
+
+		if (fromIndex >= length) {
+			return -1;
+		}
+
+		if (fromIndex >= 0) {
+
+			if (fromIndex === -0) {
+				fromIndex = +0;
+			}
+		}
+
+		else {
+			fromIndex += length;
+
+			if (fromIndex < 0) {
+				fromIndex = 0;
+			}			
+		}
+
+		index = fromIndex;
+
+		while (index < length) {
+			pKey = String(index);
+
+			if (_this.hasOwnProperty(pKey)) {
+				pValue = _this[pKey];
+
+				if (pValue === searchElement) {
+					return index;
+				}
+			}
+
+			index++;
+		}
+
+		return -1;
+	});	
 } ());
 
 

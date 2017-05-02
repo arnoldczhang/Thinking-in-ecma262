@@ -277,7 +277,7 @@
 		logger.count('`Array.prototype.copyWithin`');
 		var 
 			args = arguments
-			, _this = Object(this)
+			, _this = toObject(this)
 			, length = _this.length
 			, list = []
 			, index = 0
@@ -361,7 +361,7 @@
 		thisArg = thisArg || void 0;
 		var 
 			args = arguments
-			, _this = Object(this)
+			, _this = toObject(this)
 			, length = _this.length
 			, list = []
 			, index = length
@@ -369,7 +369,7 @@
 			;
 
 		if (!isCallable(cb)) {
-			throw new TypeError('');
+			throw new TypeError('undefined is not a function');
 		}
 
 		while (--index >= 0) {
@@ -389,9 +389,8 @@
 		logger.count('`Array.prototype.fill`');
 		var 
 			args = arguments
-			, _this = Object(this)
+			, _this = toObject(this)
 			, length = _this.length
-			, index = length
 			;
 
 		if (!isExist(value)) {
@@ -416,6 +415,150 @@
 		}
 
 		return _this;
+	});
+
+	/**
+	 * Array.prototype.filter
+	 */
+	$def(Array.prototype, '$filter', function filter (cb, thisArg) {
+		logger.count('`Array.prototype.filter`');
+		thisArg = thisArg || undefined;
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, to = 0
+			, index = 0
+			, pValue
+			, pKey
+			, list = Array(0)
+			;
+
+		if (!isCallable(cb)) {
+			return new TypeError('');
+		}
+
+		while (index < length) {
+			pKey = String(index);
+
+			if (_this.hasOwnProperty(pKey)) {
+
+				pValue = _this[index];
+
+				if (cb.call(thisArg, pValue, index, _this)) {
+					list[list.length] = pValue;
+					to++;
+				}
+			}
+
+			index++;
+		}
+
+		return list;
+	});
+
+	/**
+	 * Array.prototype.find
+	 */
+	$def(Array.prototype, '$find', function find (cb, thisArg) {
+		logger.count('`Array.prototype.find`');
+		thisArg = thisArg || undefined;
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, index = 0
+			, pKey
+			, pValue
+			, returnValue
+			;
+
+		if (!isCallable(cb)) {
+			return new TypeError('');
+		}
+
+		while (index < length) {
+			pKey = String(index);
+			pValue = _this[pKey];
+
+			if (cb.call(thisArg, pValue, index, _this)) {
+				returnValue = pValue;
+				break;
+			}
+
+			index++;
+		}
+
+		return returnValue;
+	});
+
+	/**
+	 * Array.prototype.findIndex
+	 */
+	$def(Array.prototype, '$findIndex', function findIndex (cb, thisArg) {
+		logger.count('`Array.prototype.findIndex`');
+		thisArg = thisArg || undefined;
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, index = 0
+			, pKey
+			, pValue
+			, returnValue = -1
+			;
+
+		if (!isCallable(cb)) {
+			return new TypeError('');
+		}
+
+		while (index < length) {
+			pKey = String(index);
+			pValue = _this[pKey];
+
+			if (cb.call(thisArg, pValue, index, _this)) {
+				returnValue = index;
+				break;
+			}
+
+			index++;
+		}
+
+		return returnValue;
+	});
+
+	/**
+	 * Array.prototype.forEach
+	 */
+	$def(Array.prototype, '$forEach', function forEach (cb, thisArg) {
+		logger.count('`Array.prototype.forEach`');
+		thisArg = thisArg || undefined;
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, index = 0
+			, pKey
+			, pValue
+			, returnValue = undefined;
+			;
+
+		if (!isCallable(cb)) {
+			return new TypeError('');
+		}
+
+		while (index < length) {
+			pKey = String(index);
+
+			if (_this.hasOwnProperty(pKey)) {
+				pValue = _this[pKey];
+				cb.call(thisArg, pValue, index, _this);			
+			}
+
+			index++;
+		}
+
+		return returnValue;
 	});
 } ());
 

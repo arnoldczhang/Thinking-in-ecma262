@@ -13,34 +13,36 @@
 
 	var _ = {};
 
-	$each('Object String Symbol Null Undefined Array Function '.split(/\s/), function (el) {
+	$each('Object String Symbol Null Undefined Array Function Boolean'.split(/\s/), function (el) {
 		_['is' + el] = function (obj) {
 			return $toString.call(obj) === '[object ' + el + ']';
 		};
 	});
 
-	var logger = function () {
-		var keySet = {};
-		return {
-			count: function count (key) {
+	var logger = {
+		keySet: {},
+		count: function count (key) {
 
-				var count = keySet[key];
+			var count = this.keySet[key];
 
-				if (_.isUndefined(count)) {
-					keySet[key] = count = 1;
-				}
-
-				else {
-					keySet[key] = count += 1;
-				}
-
-				console.log((key + ' call for ' + count + ' times').magenta);
+			if (_.isUndefined(count)) {
+				this.keySet[key] = count = 1;
 			}
-		};
-	}();
+
+			else {
+				this.keySet[key] = count += 1;
+			}
+
+			console.log((key + ' call for ' + count + ' times').magenta);
+		}
+	};
 
 	function isCallable (func) {
 		return func.call;
+	};
+
+	function isExist (obj) {
+		return obj != null;
 	};
 
 	function isPropertyKey (arg) {
@@ -76,6 +78,46 @@
 		}
 
 		return Object(o);
+	};
+
+	function isNumeric (num) {
+		return num == Number(num);
+	}
+
+	function toInteger (num) {
+
+		if (_.isNull(num)) {
+			num = +0;
+		}
+
+		if (_.isUndefined(num)) {
+			num = NaN;
+		}
+
+		if (_.isBoolean(num)) {
+			num = num ? 1 : 0;
+		}
+
+		if (_.isString(num)) {
+
+			if (isNumeric(num)) {
+				num = Number(num);
+			}
+
+			else {
+				num = NaN;
+			}
+		}
+
+		if (isNaN(num)) {
+			return 0;
+		}
+
+		if (num === 0 || num === Infinity || num === -Infinity) {
+			return num;
+		}
+
+		return Math.floor(num);
 	};
 
 	function getV (v, p) {
@@ -235,7 +277,7 @@
 		logger.count('`Array.prototype.copyWithin`');
 		var 
 			args = arguments
-			, _this = Object(this)
+			, _this = toObject(this)
 			, length = _this.length
 			, list = []
 			, index = 0
@@ -319,7 +361,7 @@
 		thisArg = thisArg || void 0;
 		var 
 			args = arguments
-			, _this = Object(this)
+			, _this = toObject(this)
 			, length = _this.length
 			, list = []
 			, index = length
@@ -327,7 +369,7 @@
 			;
 
 		if (!isCallable(cb)) {
-			throw new TypeError('');
+			throw new TypeError('undefined is not a function');
 		}
 
 		while (--index >= 0) {
@@ -337,6 +379,185 @@
 				break;
 			}
 		}
+		return returnValue;
+	});
+
+	/**
+	 * Array.prototype.fill
+	 */
+	$def(Array.prototype, '$fill', function fill (value, start, end) {
+		logger.count('`Array.prototype.fill`');
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			;
+
+		if (!isExist(value)) {
+			return new TypeError('');
+		}
+
+		start = toInteger(start);
+		start = start < 0 ? Math.max(length + start, 0) : Math.min(start, length);
+
+		if (_.isUndefined(end)) {
+			end = length;
+		}
+
+		else {
+			end = toInteger(end);
+			end = end < 0 ? Math.max(length + end, 0) : Math.min(end, length);
+		}
+
+		while (start < end) {
+			_this[start] = value;
+			start++;
+		}
+
+		return _this;
+	});
+
+	/**
+	 * Array.prototype.filter
+	 */
+	$def(Array.prototype, '$filter', function filter (cb, thisArg) {
+		logger.count('`Array.prototype.filter`');
+		thisArg = thisArg || undefined;
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, to = 0
+			, index = 0
+			, pValue
+			, pKey
+			, list = Array(0)
+			;
+
+		if (!isCallable(cb)) {
+			return new TypeError('');
+		}
+
+		while (index < length) {
+			pKey = String(index);
+
+			if (_this.hasOwnProperty(pKey)) {
+
+				pValue = _this[index];
+
+				if (cb.call(thisArg, pValue, index, _this)) {
+					list[list.length] = pValue;
+					to++;
+				}
+			}
+
+			index++;
+		}
+
+		return list;
+	});
+
+	/**
+	 * Array.prototype.find
+	 */
+	$def(Array.prototype, '$find', function find (cb, thisArg) {
+		logger.count('`Array.prototype.find`');
+		thisArg = thisArg || undefined;
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, index = 0
+			, pKey
+			, pValue
+			, returnValue
+			;
+
+		if (!isCallable(cb)) {
+			return new TypeError('');
+		}
+
+		while (index < length) {
+			pKey = String(index);
+			pValue = _this[pKey];
+
+			if (cb.call(thisArg, pValue, index, _this)) {
+				returnValue = pValue;
+				break;
+			}
+
+			index++;
+		}
+
+		return returnValue;
+	});
+
+	/**
+	 * Array.prototype.findIndex
+	 */
+	$def(Array.prototype, '$findIndex', function findIndex (cb, thisArg) {
+		logger.count('`Array.prototype.findIndex`');
+		thisArg = thisArg || undefined;
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, index = 0
+			, pKey
+			, pValue
+			, returnValue = -1
+			;
+
+		if (!isCallable(cb)) {
+			return new TypeError('');
+		}
+
+		while (index < length) {
+			pKey = String(index);
+			pValue = _this[pKey];
+
+			if (cb.call(thisArg, pValue, index, _this)) {
+				returnValue = index;
+				break;
+			}
+
+			index++;
+		}
+
+		return returnValue;
+	});
+
+	/**
+	 * Array.prototype.forEach
+	 */
+	$def(Array.prototype, '$forEach', function forEach (cb, thisArg) {
+		logger.count('`Array.prototype.forEach`');
+		thisArg = thisArg || undefined;
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, index = 0
+			, pKey
+			, pValue
+			, returnValue = undefined;
+			;
+
+		if (!isCallable(cb)) {
+			return new TypeError('');
+		}
+
+		while (index < length) {
+			pKey = String(index);
+
+			if (_this.hasOwnProperty(pKey)) {
+				pValue = _this[pKey];
+				cb.call(thisArg, pValue, index, _this);			
+			}
+
+			index++;
+		}
+
 		return returnValue;
 	});
 } ());

@@ -65,7 +65,7 @@ describe('Array', function () {
         expect([1, 2, 3, 4, 5].$copyWithin(-2, -3, -1)[3]).to.be.equal(3);
         expect([1, 2, 3, 4, 5].$copyWithin(-2, -3, -1)[4]).to.be.equal(4);
         done();
-    });    
+    });
 
     it('Array.prototype.every', function (done) {
 
@@ -76,8 +76,130 @@ describe('Array', function () {
         expect([12, 5, 8, 130, 44].$every(isBigEnough)).to.be.false;
         expect([12, 54, 18, 130, 44].$every(isBigEnough)).to.be.true;
         done();
-    });       
+    });
+
+    it('Array.prototype.fill', function (done) {
+        var arr = [1, 2, 3];
+        expect(arr.$fill(4)).to.deep.equal([4, 4, 4]);
+        arr = [1, 2, 3];
+        expect(arr.$fill(4, 1)).to.deep.equal([1, 4, 4]);
+        arr = [1, 2, 3];
+        expect(arr.$fill(4, 1, 2)).to.deep.equal([1, 4, 3]);
+        arr = [1, 2, 3];
+        expect(arr.$fill(4, -3, -2)).to.deep.equal([4, 2, 3]);
+        arr = [1, 2, 3];
+        expect(arr.$fill(4, NaN, NaN)).to.deep.equal([1, 2, 3]);
+        arr = [1, 2, 3];
+        expect(Array(3).$fill(4)).to.deep.equal([4, 4, 4]);
+        expect(arr.$fill.call({
+            length: 3
+        }, 4)).to.deep.equal({
+            0: 4,
+            1: 4,
+            2: 4,
+            length: 3
+        });
+        done();
+    });
+
+    it('Array.prototype.filter', function (done) {
+        var arr = [12, 5, 8, 130, 44];
+
+        function isBigEnough(value) {
+          return value >= 10;
+        };
+
+        expect(arr.$filter(isBigEnough)).to.deep.equal([12, 130, 44]);
+
+        var fruits = ['apple', 'banana', 'grapes', 'mango', 'orange'];
+
+        function filterItems(query) {
+          return fruits.filter(function(el) {
+              return el.toLowerCase().indexOf(query.toLowerCase()) > -1;
+          })
+        };
+        expect(filterItems('ap')).to.deep.equal(['apple', 'grapes']);
+        expect(filterItems('an')).to.deep.equal(['banana', 'mango', 'orange']);
+        done();
+    });
+
+    it('Array.prototype.find', function (done) {
+        var inventory = [
+            {name: 'apples', quantity: 2},
+            {name: 'bananas', quantity: 0},
+            {name: 'cherries', quantity: 5}
+        ];
+
+        function findCherries(fruit) { 
+            return fruit.name === 'cherries';
+        };
+
+        expect(inventory.$find(findCherries)).to.deep.equal({ name: 'cherries', quantity: 5 });
+
+        function isPrime(element, index, array) {
+          var start = 2;
+          while (start <= Math.sqrt(element)) {
+            if (element % start++ < 1) {
+              return false;
+            }
+          }
+          return element > 1;
+        };
+
+        expect([4, 6, 8, 12].$find(isPrime)).to.be.equal(undefined);
+        expect([4, 5, 8, 12].$find(isPrime)).to.be.equal(5);
+
+        var arr = [,,,];
+        var count = 0;
+        arr.$find(function () {
+            count++;
+            return false;
+        });
+        expect(count).to.be.equal(3);
+        done();
+    });
+
+    it('Array.prototype.findIndex', function (done) {
+        function isPrime(element, index, array) {
+          var start = 2;
+          while (start <= Math.sqrt(element)) {
+            if (element % start++ < 1) {
+              return false;
+            }
+          }
+          return element > 1;
+        };        
+
+        expect([4, 6, 8, 12].$findIndex(isPrime)).to.be.equal(-1);
+        expect([4, 5, 8, 12].$findIndex(isPrime)).to.be.equal(1);        
+        done();
+    });
+
+
+    it('Array.prototype.forEach', function (done) {
+        var words = ['one', 'two', 'three', 'four'];
+        words.$forEach(function(word) {
+          if (word === 'two') {
+            words.shift();
+          }
+        });
+        expect(words).to.deep.equal(['two', 'three', 'four']);
+        var arr = [2, 5, , 9];
+        var count = 0;
+        arr.$forEach(function () {
+            count++;
+            return false;
+        });
+        expect(count).to.be.equal(3);
+        done();
+    });
+
 });
+
+
+
+
+
 
 
 

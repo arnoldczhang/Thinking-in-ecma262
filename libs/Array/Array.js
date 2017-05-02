@@ -13,34 +13,36 @@
 
 	var _ = {};
 
-	$each('Object String Symbol Null Undefined Array Function '.split(/\s/), function (el) {
+	$each('Object String Symbol Null Undefined Array Function Boolean'.split(/\s/), function (el) {
 		_['is' + el] = function (obj) {
 			return $toString.call(obj) === '[object ' + el + ']';
 		};
 	});
 
-	var logger = function () {
-		var keySet = {};
-		return {
-			count: function count (key) {
+	var logger = {
+		keySet: {},
+		count: function count (key) {
 
-				var count = keySet[key];
+			var count = this.keySet[key];
 
-				if (_.isUndefined(count)) {
-					keySet[key] = count = 1;
-				}
-
-				else {
-					keySet[key] = count += 1;
-				}
-
-				console.log((key + ' call for ' + count + ' times').magenta);
+			if (_.isUndefined(count)) {
+				this.keySet[key] = count = 1;
 			}
-		};
-	}();
+
+			else {
+				this.keySet[key] = count += 1;
+			}
+
+			console.log((key + ' call for ' + count + ' times').magenta);
+		}
+	};
 
 	function isCallable (func) {
 		return func.call;
+	};
+
+	function isExist (obj) {
+		return obj != null;
 	};
 
 	function isPropertyKey (arg) {
@@ -76,6 +78,46 @@
 		}
 
 		return Object(o);
+	};
+
+	function isNumeric (num) {
+		return num == Number(num);
+	}
+
+	function toInteger (num) {
+
+		if (_.isNull(num)) {
+			num = +0;
+		}
+
+		if (_.isUndefined(num)) {
+			num = NaN;
+		}
+
+		if (_.isBoolean(num)) {
+			num = num ? 1 : 0;
+		}
+
+		if (_.isString(num)) {
+
+			if (isNumeric(num)) {
+				num = Number(num);
+			}
+
+			else {
+				num = NaN;
+			}
+		}
+
+		if (isNaN(num)) {
+			return 0;
+		}
+
+		if (num === 0 || num === Infinity || num === -Infinity) {
+			return num;
+		}
+
+		return Math.floor(num);
 	};
 
 	function getV (v, p) {
@@ -338,6 +380,42 @@
 			}
 		}
 		return returnValue;
+	});
+
+	/**
+	 * Array.prototype.fill
+	 */
+	$def(Array.prototype, '$fill', function fill (value, start, end) {
+		logger.count('`Array.prototype.fill`');
+		var 
+			args = arguments
+			, _this = Object(this)
+			, length = _this.length
+			, index = length
+			;
+
+		if (!isExist(value)) {
+			return new TypeError('');
+		}
+
+		start = toInteger(start);
+		start = start < 0 ? Math.max(length + start, 0) : Math.min(start, length);
+
+		if (_.isUndefined(end)) {
+			end = length;
+		}
+
+		else {
+			end = toInteger(end);
+			end = end < 0 ? Math.max(length + end, 0) : Math.min(end, length);
+		}
+
+		while (start < end) {
+			_this[start] = value;
+			start++;
+		}
+
+		return _this;
 	});
 } ());
 

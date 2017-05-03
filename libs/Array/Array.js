@@ -13,7 +13,7 @@
 
 	var _ = {};
 
-	$each('Object String Symbol Null Undefined Array Function Boolean'.split(/\s/), function (el) {
+	$each('Object String Symbol Null Undefined Array Function Boolean Number'.split(/\s/), function (el) {
 		_['is' + el] = function (obj) {
 			return $toString.call(obj) === '[object ' + el + ']';
 		};
@@ -39,6 +39,10 @@
 
 	function isCallable (func) {
 		return func.call;
+	};
+
+	function isMeanless (obj) {
+		return _.isNull(obj) || _.isUndefined(obj);
 	};
 
 	function isExist (obj) {
@@ -118,6 +122,55 @@
 		}
 
 		return Math.floor(num);
+	};
+
+	function type (value) {
+		return typeof value;
+	};
+
+	function isSameValueZero (x, y) {
+
+		if (type(x) != type(y)) {
+			return false;
+		}
+
+		if (_.isNumber(x)) {
+
+			if (isNaN(x) && isNaN(y)) {
+				return true;
+			}
+
+			if (x === +0 && y === -0
+				|| x === -0 && y === +0) {
+				return true;
+			}
+
+			if (_.isNumber(y) && x === y) {
+				return true;
+			}
+
+			return false;
+		}
+
+		if (_.isUndefined(x) || _.isNull(x)) {
+			return true;
+		}
+
+		if (_.isString(x)) {
+
+			//TODO the same sequence of code units
+			return x === y;
+		}
+
+		if (_.isBoolean(x)) {
+			return x === true && y === true
+				|| x === false && y === false;
+		}
+
+		if (_.isObject(x) && _.isObject(y)) {
+			return x === y;
+		}
+
 	};
 
 	function getV (v, p) {
@@ -540,7 +593,7 @@
 			, index = 0
 			, pKey
 			, pValue
-			, returnValue = undefined;
+			, returnValue = undefined
 			;
 
 		if (!isCallable(cb)) {
@@ -560,6 +613,399 @@
 
 		return returnValue;
 	});
+
+	/**
+	 * Array.prototype.includes
+	 */
+	$def(Array.prototype, '$includes', function includes (searchElement, fromIndex) {
+		logger.count('`Array.prototype.includes`');
+		fromIndex = toInteger(fromIndex);
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, index
+			, pKey
+			, pValue
+			;
+
+		if (!length) {
+			return false;
+		}
+
+		if (fromIndex < 0) {
+			fromIndex += length;
+
+			if (fromIndex < 0) {
+				fromIndex = 0;
+			}
+		}
+
+		index = fromIndex;
+
+		while (index < length) {
+			pKey = String(index);
+			pValue = _this[pKey];
+
+			if (isSameValueZero(pValue, searchElement)) {
+				return true;
+			}
+
+			index++;
+		}
+
+		return false;
+	});
+
+	/**
+	 * Array.prototype.indexOf
+	 */
+	$def(Array.prototype, '$indexOf', function indexOf (searchElement, fromIndex) {
+		logger.count('`Array.prototype.indexOf`');
+		fromIndex = toInteger(fromIndex);
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, index
+			, pKey
+			, pValue
+			;
+
+		if (!length) {
+			return -1;
+		}
+
+		if (fromIndex >= length) {
+			return -1;
+		}
+
+		if (fromIndex >= 0) {
+
+			if (fromIndex === -0) {
+				fromIndex = +0;
+			}
+		}
+
+		else {
+			fromIndex += length;
+
+			if (fromIndex < 0) {
+				fromIndex = 0;
+			}			
+		}
+
+		index = fromIndex;
+
+		while (index < length) {
+			pKey = String(index);
+
+			if (_this.hasOwnProperty(pKey)) {
+				pValue = _this[pKey];
+
+				if (pValue === searchElement) {
+					return index;
+				}
+			}
+
+			index++;
+		}
+
+		return -1;
+	});
+
+	/**
+	 * Array.prototype.join
+	 */
+	$def(Array.prototype, '$join', function join (seperator) {
+		logger.count('`Array.prototype.join`');
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, index = 1
+			, firstEl
+			, partial
+			, pKey
+			, pValue
+			;
+
+		if (_.isUndefined(seperator)) {
+			seperator = ',';
+		}
+
+		if (!length) {
+			return '';
+		}
+
+		firstEl = _this[0];
+		partial = isMeanless(firstEl) ? '' : firstEl;
+
+		while (index < length) {
+			partial += seperator;
+			pKey = String(index);
+			pValue = _this[pKey];
+			partial += isMeanless(pValue) ? '' : pValue;
+			index++;
+		}
+
+		return partial;
+	});
+
+
+	/**
+	 * Array.prototype.lastIndexOf
+	 */
+	$def(Array.prototype, '$lastIndexOf', function lastIndexOf (searchElement, fromIndex) {
+		logger.count('`Array.prototype.lastIndexOf`');
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, index
+			, pKey
+			, pValue
+			;
+
+		if (!length) {
+			return -1;
+		}
+
+		if (_.isUndefined(fromIndex)) {
+			index = length - 1;
+		}
+
+		else {
+
+			if (fromIndex >= 0) {
+
+				if (fromIndex === -0) {
+					index = +0;
+				}
+
+				else {
+					index = Math.min(fromIndex, length - 1);
+				}
+			}
+
+			else {
+				index = length + fromIndex;		
+			}			
+		}
+
+		while (index >= 0) {
+			pKey = String(index);
+			pValue = _this[pKey];
+
+			if (_this.hasOwnProperty(pKey)) {
+
+				if (pValue === searchElement) {
+					return index;
+				}
+			}
+			index--;
+		}
+
+		return -1;
+	});
+
+	/**
+	 * Array.prototype.map
+	 */
+	$def(Array.prototype, '$map', function map (cb, thisArg) {
+		logger.count('`Array.prototype.map`');
+		thisArg = thisArg || undefined;
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, index = 0
+			, pKey
+			, pValue
+			, list = Array(0)
+			;
+
+		if (!isCallable(cb)) {
+			return new TypeError('');
+		}
+
+		while (index < length) {
+			pKey = String(index);
+
+			if (_this.hasOwnProperty(pKey)) {
+				pValue = _this[pKey];
+				list[list.length] = cb.call(thisArg, pValue, index, _this);			
+			}
+
+			index++;
+		}
+
+		return list;
+	});
+
+	/**
+	 * Array.prototype.pop
+	 */
+	$def(Array.prototype, '$pop', function pop () {
+		logger.count('`Array.prototype.pop`');
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, pValue
+			;
+
+		if (!length) {
+			return undefined;
+		}
+
+		if (length > 0) {
+			pValue = _this[length - 1];
+			_this.length = length - 1;
+		}
+
+		return pValue;
+	});
+
+	/**
+	 * Array.prototype.push
+	 */
+	$def(Array.prototype, '$push', function push () {
+		logger.count('`Array.prototype.push`');
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, argsLength = args.length
+			, pValue
+			, index = 0
+			;
+
+		if (length + argsLength > MAX_ARRAY_LEN) {
+			throw new TypeError('');
+		}
+
+		if (argsLength) {
+
+			while (index < argsLength) {
+				_this[_this.length] = args[index];
+				_this.length = ++length;
+				index++;
+			}
+		}
+
+		return length;
+	});
+
+	/**
+	 * Array.prototype.reduce
+	 */
+	$def(Array.prototype, '$reduce', function reduce (cb, initialValue) {
+		logger.count('`Array.prototype.reduce`');
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, pKey
+			, pValue
+			, index = 0
+			, accumulator
+			;
+
+		if (!isCallable(cb)) {
+			throw new TypeError('');
+		}
+
+		if (!length && _.isUndefined(initialValue)) {
+			throw new TypeError('');
+		}
+
+		if (!_.isUndefined(initialValue)) {
+			accumulator = initialValue;
+		}
+
+		else {
+
+			while (index < length) {
+				pKey = String(index);
+				index++;
+
+				if (_this.hasOwnProperty(pKey)) {
+					accumulator = _this[pKey];
+					break;
+				}
+
+			}
+		}
+
+		while (index < length) {
+			pKey = String(index);
+
+			if (_this.hasOwnProperty(pKey)) {
+				pValue = _this[pKey];
+				accumulator = cb.call(undefined, accumulator, pValue, index, _this);
+			}
+
+			index++;
+		}
+
+		return accumulator;
+	});
+
+	/**
+	 * Array.prototype.reduceRight
+	 */
+	$def(Array.prototype, '$reduceRight', function reduceRight (cb, initialValue) {
+		logger.count('`Array.prototype.reduceRight`');
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, pKey
+			, pValue
+			, index = length - 1
+			, accumulator
+			;
+
+		if (!isCallable(cb)) {
+			throw new TypeError('');
+		}
+
+		if (!length && _.isUndefined(initialValue)) {
+			throw new TypeError('');
+		}
+
+		if (!_.isUndefined(initialValue)) {
+			accumulator = initialValue;
+		}
+
+		else {
+
+			while (index >= 0) {
+				pKey = String(index);
+				index--;
+
+				if (_this.hasOwnProperty(pKey)) {
+					accumulator = _this[pKey];
+					break;
+				}
+
+			}
+		}
+
+		while (index >= 0) {
+			pKey = String(index);
+
+			if (_this.hasOwnProperty(pKey)) {
+				pValue = _this[pKey];
+				accumulator = cb.call(undefined, accumulator, pValue, index, _this);
+			}
+
+			index--;
+		}
+
+		return accumulator;
+	});	
 } ());
 
 

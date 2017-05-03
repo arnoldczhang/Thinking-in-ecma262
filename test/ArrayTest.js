@@ -194,6 +194,196 @@ describe('Array', function () {
         done();
     });
 
+    it('Array.prototype.includes', function (done) {
+        expect([1, 2, 3].$includes(2)).to.be.true;
+        expect([1, 2, 3].$includes(4)).to.be.false;
+        expect([1, 2, 3].$includes(3, 3)).to.be.false;
+        expect([1, 2, 3].$includes(3, -1)).to.be.true;
+        expect([1, 2, NaN].$includes(NaN)).to.be.true;
+
+        var arr = ['a', 'b', 'c'];
+        expect(arr.$includes('c', 3)).to.be.false;
+        expect(arr.$includes('c', 100)).to.be.false;
+        expect(arr.$includes('a', -100)).to.be.true;
+        expect(arr.$includes('b', -100)).to.be.true;
+
+        (function() {
+          expect([].$includes.call(arguments, 'a')).to.be.true;
+          expect([].$includes.call(arguments, 'd')).to.be.false;
+        })('a','b','c');
+        done();
+    });
+
+    it('Array.prototype.indexOf', function (done) {
+        var a = [2, 9, 9]; 
+        expect(a.$indexOf(2)).to.be.equal(0);
+        expect(a.$indexOf(7)).to.be.equal(-1);
+        var array = [2, 5, 9];
+        expect(array.$indexOf(2)).to.be.equal(0);     
+        expect(array.$indexOf(7)).to.be.equal(-1);    
+        expect(array.$indexOf(9, 2)).to.be.equal(2);  
+        expect(array.$indexOf(2, -1)).to.be.equal(-1);
+        expect(array.$indexOf(2, -3)).to.be.equal(0);
+
+        var indices = [];
+        var array = ['a', 'b', 'a', 'c', 'a', 'd'];
+        var element = 'a';
+        var idx = array.$indexOf(element);
+        while (idx != -1) {
+          indices.push(idx);
+          idx = array.$indexOf(element, idx + 1);
+        }
+        expect(indices).to.deep.equal([0, 2, 4]);
+        done();
+    });
+
+    it('Array.prototype.join', function (done) {
+        var a = ['Wind', 'Rain', 'Fire'];
+        expect(a.$join()).to.be.equal('Wind,Rain,Fire');
+        expect(a.$join(', ')).to.be.equal('Wind, Rain, Fire');
+        expect(a.$join(' + ')).to.be.equal('Wind + Rain + Fire');
+        expect(a.$join('')).to.be.equal('WindRainFire');
+        done();
+    });
+
+    it('Array.prototype.lastIndexOf', function (done) {
+        var numbers = [2, 5, 9, 2];
+        expect(numbers.$lastIndexOf(2)).to.be.equal(3);
+        expect(numbers.$lastIndexOf(7)).to.be.equal(-1);
+        expect(numbers.$lastIndexOf(2, 3)).to.be.equal(3);
+        expect(numbers.$lastIndexOf(2, 2)).to.be.equal(0);
+        expect(numbers.$lastIndexOf(2, -2)).to.be.equal(0);
+        expect(numbers.$lastIndexOf(2, -1)).to.be.equal(3);
+        done();
+    });
+
+    it('Array.prototype.map', function (done) {
+        var numbers = [1, 5, 10, 15];
+        var roots = numbers.$map(function(x) {
+           return x * 2;
+        });
+        expect(roots).to.deep.equal([2, 10, 20, 30]);
+
+        var numbers = [1, 4, 9];
+        var roots = numbers.$map(Math.sqrt);
+        expect(roots).to.deep.equal([1, 2, 3]);
+
+        var kvArray = [{key: 1, value: 10}, 
+               {key: 2, value: 20}, 
+               {key: 3, value: 30}];
+
+        var reformattedArray = kvArray.$map(function(obj) { 
+           var rObj = {};
+           rObj[obj.key] = obj.value;
+           return rObj;
+        });
+        expect(reformattedArray).to.deep.equal([{1: 10}, {2: 20}, {3: 30}]);
+
+        var map = Array.prototype.$map;
+        var a = map.call('Hello World', function(x) { 
+          return x.charCodeAt(0); 
+        });
+        expect(a).to.deep.equal([72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100]);
+
+        var str = '12345';
+        var str2 = Array.prototype.map.call(str, function(x) {
+          return x;
+        }).reverse().join(''); 
+        expect(str2).to.be.equal('54321');
+
+        var str3 = ['1', '2', '3'].$map(parseInt);
+        expect(str3).to.deep.equal([1, NaN, NaN]);
+
+        done();
+    });    
+
+    it('Array.prototype.pop', function (done) {
+        var a = [1, 2, 3];
+        expect(a.$pop()).to.be.equal(3);
+        expect(a.length).to.be.equal(2);
+
+        var myFish = ['angel', 'clown', 'mandarin', 'sturgeon'];
+        var popped = myFish.$pop();
+        expect(popped).to.be.equal('sturgeon');
+        expect(myFish).to.deep.equal(['angel', 'clown', 'mandarin']);
+        done();
+    });
+
+    it('Array.prototype.push', function (done) {
+        var numbers = [1, 2, 3];
+        var result = numbers.$push(4);
+        expect(numbers).to.deep.equal([1,2,3,4]);
+        expect(result).to.be.equal(4);
+
+        var sports = ['soccer', 'baseball'];
+        var total = sports.$push('football', 'swimming');
+        expect(sports).to.deep.equal(['soccer', 'baseball', 'football', 'swimming']);
+        expect(total).to.be.equal(4);
+
+        var vegetables = ['parsnip', 'potato'];
+        var moreVegs = ['celery', 'beetroot'];
+        Array.prototype.$push.apply(vegetables, moreVegs);
+        expect(vegetables).to.deep.equal(['parsnip', 'potato', 'celery', 'beetroot']);
+
+        var obj = {
+            length: 0
+        };
+        Array.prototype.$push.apply(obj, ['a', 'b']);
+        expect(obj).to.deep.equal({
+            length: 2,
+            0: 'a',
+            1: 'b'
+        });
+
+        done();
+    });
+
+
+    it('Array.prototype.reduce', function (done) {
+        var maxCallback = ( acc, cur ) => Math.max( acc.x, cur.x );
+        var maxCallback2 = ( max, cur ) => Math.max( max, cur );
+        expect([ { x: 22 }, { x: 42 } ].$reduce( maxCallback )).to.be.equal(42);
+        expect([ { x: 22 },               ].$reduce( maxCallback )).to.deep.equal({x: 22});
+        
+        var sum = [0, 1, 2, 3].$reduce(function (a, b) {
+          return a + b;
+        }, 0);
+        expect(sum).to.be.equal(6);
+
+        var total = [ 0, 1, 2, 3 ].$reduce(
+          ( acc, cur ) => acc + cur,
+          100
+        );
+        expect(total).to.be.equal(106);
+
+        var flattened = [[0, 1], [2, 3], [4, 5]].reduce(
+          function(a, b) {
+            return a.concat(b);
+          },
+          []
+        );
+        expect(flattened).to.deep.equal([0, 1, 2, 3, 4, 5]);
+
+        done();
+    });    
+
+    it('Array.prototype.reduceRight', function (done) {
+        var flattened = [[0, 1], [2, 3], [4, 5]].$reduceRight(function(a, b) {
+            return a.concat(b);
+        }, []);
+        expect(flattened).to.deep.equal([4, 5, 2, 3, 0, 1]);
+
+        var sum = [0, 1, 2, 3].$reduceRight(function(a, b) {
+          return a + b;
+        });
+        expect(sum).to.be.equal(6);
+
+        var a = ['1', '2', '3', '4', '5']; 
+        var right = a.$reduceRight(function(prev, cur) { return prev + cur; });
+        expect(right).to.be.equal('54321');
+        done();
+    });
+
 });
 
 

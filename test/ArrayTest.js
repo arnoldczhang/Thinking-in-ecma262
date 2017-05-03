@@ -382,6 +382,7 @@ describe('Array', function () {
         var right = a.$reduceRight(function(prev, cur) { return prev + cur; });
         expect(right).to.be.equal('54321');
         done();
+        console.log(111)
     });
 
 });

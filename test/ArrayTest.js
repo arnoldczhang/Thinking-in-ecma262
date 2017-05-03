@@ -381,6 +381,7 @@ describe('Array', function () {
         var a = ['1', '2', '3', '4', '5']; 
         var right = a.$reduceRight(function(prev, cur) { return prev + cur; });
         expect(right).to.be.equal('54321');
+        console.log(33333)
         done();
     });
 

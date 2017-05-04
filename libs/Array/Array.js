@@ -1005,7 +1005,202 @@
 		}
 
 		return accumulator;
-	});	
+	});
+
+	/**
+	 * Array.prototype.reverse
+	 */
+	$def(Array.prototype, '$reverse', function reverse () {
+		logger.count('`Array.prototype.reverse`');
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, middle = Math.floor(length / 2)
+			, upper
+			, lower = 0
+			, upperKey
+			, lowerKey
+			, upperExist
+			, lowerExist
+			, upperValue
+			, lowerValue
+			;
+
+		while (lower != middle) {
+			upper = length - lower - 1;
+
+			upperKey = String(upper);
+			lowerKey = String(lower);
+			
+			upperExist = _this.hasOwnProperty(upperKey);
+			lowerExist = _this.hasOwnProperty(lowerKey);
+
+			if (upperExist) {
+				upperValue = _this[upperKey];
+			}
+
+			if (lowerExist) {
+				lowerValue = _this[lowerKey];
+			}
+
+			if (upperExist && lowerExist) {
+				_this[lower] = upperValue;
+				_this[upper] = lowerValue;
+			}
+
+			else if (!lowerExist && upperExist) {
+				_this[lowerKey] = upperValue;
+				delete _this[upperKey];
+			}
+
+			else if (lowerExist && !upperExist) {
+				_this[upperKey] = lowerValue;
+				delete _this[lowerKey];
+			}
+			lower++;
+		}
+
+		return _this;
+	});
+
+	/**
+	 * Array.prototype.shift
+	 */
+	$def(Array.prototype, '$shift', function shift () {
+		logger.count('`Array.prototype.shift`');
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, index
+			, preKey
+			, pKey
+			, pValue
+			, first
+			;
+
+		if (!length) {
+			return first;
+		}
+
+		first = _this[0];
+		index = 1;
+
+		while (index < length) {
+			pKey = String(index);
+			preKey = String(index - 1);
+
+			if (_this.hasOwnProperty(pKey)) {
+				_this[preKey] = _this[pKey];
+			}
+
+			else {
+				delete _this[preKey];
+			}
+
+			index++;
+		}
+
+		delete _this[length - 1];
+		_this.length = length - 1;
+		return first;
+	});
+
+	/**
+	 * Array.prototype.slice
+	 */
+	$def(Array.prototype, '$slice', function slice (start, end) {
+		logger.count('`Array.prototype.slice`');
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, newLength = 0
+			, index
+			, pKey
+			, pValue
+			, list
+			;
+
+		if (_.isUndefined(start)) {
+			start = 0;
+		}
+
+		else {
+			start = toInteger(start);
+
+			if (start >= 0) {
+				start = Math.min(start, length);
+			}
+
+			else {
+				start = Math.max(length + start, 0);
+			}
+		}
+
+		if (_.isUndefined(end)) {
+			end = length;
+		}
+
+		else {
+			end = toInteger(end);
+
+			if (end >= 0) {
+				end = Math.min(end, length);
+			}
+
+			else {
+				end = Math.max(length + end, 0)
+			}
+		}
+
+		list = Array(end - start);
+		index = start;
+
+		while (index < end) {
+			pKey = String(index);
+
+			if (_this.hasOwnProperty(pKey)) {
+				list[newLength] = _this[pKey];
+			}
+			index++;
+			newLength++;
+		}
+
+		list.length = newLength;
+		return list;
+	});
+
+	/**
+	 * Array.prototype.some
+	 */
+	$def(Array.prototype, '$some', function some (cb, thisArg) {
+		logger.count('`Array.prototype.some`');
+		thisArg = thisArg || void 0;
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, list = []
+			, index = length
+			, returnValue = false
+			;
+
+		if (!isCallable(cb)) {
+			throw new TypeError('undefined is not a function');
+		}
+
+		while (--index >= 0) {
+			
+			if (cb.call(thisArg, _this[index], index, _this)) {
+				returnValue = true;
+				break;
+			}
+		}
+		return returnValue;
+	});
+
 } ());
 
 

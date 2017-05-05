@@ -1201,6 +1201,99 @@
 		return returnValue;
 	});
 
+	/**
+	 * Array.prototype.sort
+	 */
+	$def(Array.prototype, '$sort', function sort (compareFn) {
+		logger.count('`Array.prototype.sort`');
+		thisArg = thisArg || void 0;
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			;
+
+		function isSparse () {
+			var index = 0;
+
+			while (index < length) {
+
+				if (!_this.hasOwnProperty(index)) {
+					return true;
+				}
+				index++;
+			}
+
+			return false;
+		};
+
+		function insertSort (arr) {
+	            var 
+	                length = arr.length
+	                , index = 1
+	                , innerIndex
+	                , temp
+	                ;
+
+	            while (index < length) {
+	                pValue = arr[index];
+	                innerIndex = index;
+
+	                while (innerIndex > 0 && arr[innerIndex - 1] > pValue) {
+	                    arr[innerIndex] = arr[innerIndex - 1];
+	                    arr[innerIndex - 1] = pValue;
+	                    innerIndex--;
+	                }
+	                index++;
+	            }
+	        };
+
+		function sortCompare (x, y) {
+			var 
+				value
+				, xString
+				, yString
+				;
+
+			if (_.isUndefined(x) && _.isUndefined(y)) {
+				return +0;
+			}
+
+			if (_.isUndefined(x)) {
+				return 1;
+			}
+
+			if (_.isUndefined(y)) {
+				return -1;
+			}
+
+			if (isCallable(compareFn)) {
+				value = toInteger(compareFn(x, y));
+
+				if (isNaN(value)) {
+					return +0;
+				}
+
+				return value;
+			}
+
+			xString = String(x);
+			yString = String(y);
+
+			if (xString < yString) {
+				return -1;
+			}
+
+			if (yString < xString) {
+				return 1;
+			}
+
+			return +0;
+		}
+		
+		
+	});	
+
 } ());
 
 

@@ -468,7 +468,42 @@ describe('Array', function () {
         done();
     });
 
-    
+    it('Array.prototype.sort', function (done) {
+        var fruit = ['cherries', 'apples', 'bananas'];
+        var result = fruit.$sort();
+        expect(result).to.deep.equal(['apples', 'bananas', 'cherries']);
+        expect(fruit).to.deep.equal(['apples', 'bananas', 'cherries']);
+
+        var scores = [1, 10, 21, 2]; 
+        var result2 = scores.$sort();
+        expect(result2).to.deep.equal([1, 10, 2, 21]);
+        expect(scores).to.deep.equal([1, 10, 2, 21]);
+
+        var stringArray = ["Blue", "Humpback", "Beluga"];
+        var numericStringArray = ["80", "9", "700"];
+        var numberArray = [40, 1, 5, 200];
+        var mixedNumericArray = ["80", "9", "700", 40, 1, 5, 200];
+
+        function compareNumbers(a, b)
+        {
+          return a - b;
+        }
+        expect(stringArray.$sort()).to.deep.equal(["Beluga", "Blue", "Humpback"]);
+        expect(numberArray.$sort()).to.deep.equal([1, 200, 40, 5]);
+        expect(numberArray.$sort(compareNumbers)).to.deep.equal([1, 5, 40, 200]);
+        expect(mixedNumericArray.$sort()).to.deep.equal([1,200,40,5,'700','80','9']);
+        expect(mixedNumericArray.$sort(compareNumbers)).to.deep.equal([1,5,'9',40,'80',200,'700']);
+
+        var items = ['réservé', 'premier', 'cliché', 'communiqué', 'café', 'adieu'];
+        var result3 = items.$sort(function (a, b) {
+          return a.localeCompare(b);
+        });
+
+        expect(items).to.deep.equal(['adieu', 'café', 'cliché', 'communiqué', 'premier', 'réservé']);
+        expect(result3).to.deep.equal(['adieu', 'café', 'cliché', 'communiqué', 'premier', 'réservé']);
+
+        done();
+    });
 
 });
 

@@ -381,9 +381,94 @@ describe('Array', function () {
         var a = ['1', '2', '3', '4', '5']; 
         var right = a.$reduceRight(function(prev, cur) { return prev + cur; });
         expect(right).to.be.equal('54321');
-        console.log(555)
         done();
     });
+
+    it('Array.prototype.reverse', function (done) {
+        var a = ['one', 'two', 'three'];
+        var reversed = a.$reverse();
+        expect(reversed).to.deep.equal(['three', 'two', 'one']);
+        expect(a).to.deep.equal(['three', 'two', 'one']);
+
+        var arr = [1,2,3,,5];
+        var aa = arr.$reverse();
+        expect(arr).to.deep.equal([5,,3,2,1]);
+        expect(aa).to.deep.equal([5,,3,2,1]);
+        done();
+    });
+
+    it('Array.prototype.shift', function (done) {
+        var myFish = ['angel', 'clown', 'mandarin', 'surgeon'];
+        var shifted = myFish.$shift();
+        expect(myFish).to.deep.equal(['clown', 'mandarin', 'surgeon']);
+        expect(shifted).to.be.equal('angel');
+
+        var arr = [1,2,3,,5];
+        var shift2 = arr.$shift();
+        expect(shift2).to.be.equal(1);
+        expect(arr).to.deep.equal([2,3,,5]);
+        done();
+    });
+
+    it('Array.prototype.slice', function (done) {
+        var a = ['zero', 'one', 'two', 'three'];
+        var sliced = a.$slice(1, 3);
+        expect(sliced).to.deep.equal(['one', 'two']);
+
+        function list() {
+          return Array.prototype.$slice.call(arguments);
+        }
+
+        var list1 = list(1, 2, 3);
+        expect(list1).to.deep.equal([1,2,3]);
+
+        var arr = [1,2,3,,5];
+        expect(arr.$slice(0,4)).to.deep.equal([1,2,3,]);
+        done();
+    });
+
+    it('Array.prototype.some', function (done) {
+        function isBiggerThan10(element, index, array) {
+          return element > 10;
+        }
+
+        expect([2, 5, 8, 1, 4].$some(isBiggerThan10)).to.be.equal(false);
+        expect([12, 5, 8, 1, 4].$some(isBiggerThan10)).to.be.equal(true);
+
+        var fruits = ['apple', 'banana', 'mango', 'guava'];
+        function checkAvailability(arr, val) {
+          return arr.$some(function(arrVal) {
+            return val === arrVal;
+          });
+        }
+
+        expect(checkAvailability(fruits, 'kela')).to.be.equal(false);
+        expect(checkAvailability(fruits, 'banana')).to.be.equal(true);
+
+        var TRUTHY_VALUES = [true, 'true', 1];
+
+        function getBoolean(a) {
+          'use strict';
+          
+          var value = a;
+           
+          if (typeof value === 'string') { 
+            value = value.toLowerCase().trim();
+          }
+
+          return TRUTHY_VALUES.$some(function(t) {
+            return t === value;
+          });
+        }
+
+        expect(getBoolean(false)).to.be.equal(false);
+        expect(getBoolean('false')).to.be.equal(false);
+        expect(getBoolean(1)).to.be.equal(true);
+        expect(getBoolean('true')).to.be.equal(true);
+        done();
+    });
+
+    
 
 });
 

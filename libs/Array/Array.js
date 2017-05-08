@@ -38,7 +38,7 @@
 	};
 
 	function isCallable (func) {
-		return func.call;
+		return func && func.call;
 	};
 
 	function isMeanless (obj) {
@@ -1206,12 +1206,16 @@
 	 */
 	$def(Array.prototype, '$sort', function sort (compareFn) {
 		logger.count('`Array.prototype.sort`');
-		thisArg = thisArg || void 0;
 		var 
 			args = arguments
 			, _this = toObject(this)
 			, length = _this.length
+			, _isSparse = isSparse()
 			;
+
+		return length < 10
+			? insertSort(_this)
+			: fastSort(_this);
 
 		function isSparse () {
 			var index = 0;
@@ -1221,31 +1225,74 @@
 				if (!_this.hasOwnProperty(index)) {
 					return true;
 				}
+
 				index++;
 			}
 
 			return false;
 		};
 
-		function insertSort (arr) {
+		function insertSort(arr) {
+			var
+				length = arr.length
+				, index = 1
+				, innerIndex
+				, temp
+				, pValue
+				, result
+				;
+
+			while (index < length) {
+				pValue = arr[index];
+				innerIndex = index;
+
+				while (innerIndex > 0) {
+					result = sortCompare(arr[innerIndex - 1], pValue);
+
+					if (result > 0) {
+						arr[innerIndex] = arr[innerIndex - 1];
+						arr[innerIndex - 1] = pValue;
+					}
+
+					innerIndex--;
+				}
+
+				index++;
+			}
+
+			return arr;
+		};
+
+	        function fastSort (arr) {
 	            var 
-	                length = arr.length
+	                middle =  arr[0]
+	                , leftArr = Array(0)
+	                , rightArr = Array(0)
+	                , length = arr.length
 	                , index = 1
-	                , innerIndex
-	                , temp
+	                , cValue
+	                , result
 	                ;
 
-	            while (index < length) {
-	                pValue = arr[index];
-	                innerIndex = index;
-
-	                while (innerIndex > 0 && arr[innerIndex - 1] > pValue) {
-	                    arr[innerIndex] = arr[innerIndex - 1];
-	                    arr[innerIndex - 1] = pValue;
-	                    innerIndex--;
-	                }
-	                index++;
+	            if (!length || length === 1) {
+			return arr;
 	            }
+
+	            while (index < length) {
+			cValue = arr[index];
+			result = sortCompare(middle, cValue);
+
+			if (result > 0) {
+				leftArr[leftArr.length] = cValue;
+			} 
+
+			else {
+				rightArr[rightArr.length] = cValue;
+			}
+			index++;
+	            }
+
+	            return fastSort(leftArr).concat(middle, fastSort(rightArr));
 	        };
 
 		function sortCompare (x, y) {
@@ -1255,16 +1302,19 @@
 				, yString
 				;
 
-			if (_.isUndefined(x) && _.isUndefined(y)) {
-				return +0;
-			}
+			if (_isSparse) {
 
-			if (_.isUndefined(x)) {
-				return 1;
-			}
+				if (_.isUndefined(x) && _.isUndefined(y)) {
+					return +0;
+				}
 
-			if (_.isUndefined(y)) {
-				return -1;
+				if (_.isUndefined(x)) {
+					return 1;
+				}
+
+				if (_.isUndefined(y)) {
+					return -1;
+				}
 			}
 
 			if (isCallable(compareFn)) {
@@ -1290,8 +1340,6 @@
 
 			return +0;
 		}
-		
-		
 	});	
 
 } ());

@@ -1340,7 +1340,44 @@
 
 			return +0;
 		}
-	});	
+	});
+
+
+	/**
+	 * Array.prototype.splice
+	 * TODO
+	 */
+	$def(Array.prototype, '$splice', function splice (start, deleteCount) {
+		logger.count('`Array.prototype.splice`');
+		thisArg = thisArg || void 0;
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, list = []
+			;
+
+		// TODO
+		return list;
+	});
+
+	/**
+	 * Array.prototype.toLocaleString
+	 * TODO
+	 */
+	$def(Array.prototype, '$toLocaleString', function toLocaleString (start, deleteCount) {
+		logger.count('`Array.prototype.toLocaleString`');
+		thisArg = thisArg || void 0;
+		var 
+			args = arguments
+			, _this = toObject(this)
+			, length = _this.length
+			, list = []
+			;
+
+		// TODO
+		return list;
+	});
 
 } ());
 

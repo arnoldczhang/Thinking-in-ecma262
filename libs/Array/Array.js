@@ -822,7 +822,7 @@
 			, index = 0
 			, pKey
 			, pValue
-			, list = Array(0)
+			, list = Array(length)
 			;
 
 		if (!isCallable(cb)) {
